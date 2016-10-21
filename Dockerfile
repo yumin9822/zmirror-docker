@@ -2,9 +2,6 @@ FROM ubuntu:16.04
 MAINTAINER Min Yu <yumin9822@gmail.com>
 
 #Please make sure the DOMAIN has A record which is same with your server ip. Or the SSL certifications will not be issued by letsencrypt
-#sed Á½¸öÓï¾äÏÂÒ»²½·Åµ½CMDÀïÃæ½øĞĞ²âÊÔ£¬ÒÔ±£Ö¤Õû¸ö³õÊ¼¾µÏñµÄÍêÕû¡£¿ÉÒÔ²Î¿¼https://hub.docker.com/r/tutum/ngrok/
-#sed -i "s/^my_host_name.*$/my_host_name = \'${DIMAIN}\'/g" /var/www/zmirror/config.py
-#RUN sed -i "s/ServerName.*$/ServerName ${DIMAIN}/g" /etc/apache2/sites-enabled/google.conf
 
 ENV DOMAIN **None**
 ENV MIRROR_NAME google
@@ -13,24 +10,24 @@ ENV MIRROR_NAME google
 #ENV SSLChain **None**
 
 #python3 and flask requests cchardet fastcache dependencies installation
-#cron¿ÉÑ¡°²×°¡£
+#cronå¯é€‰å®‰è£…ã€‚
 RUN apt-get update && \cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     apt-get install -y build-essential patch binutils make devscripts nano libtool libssl-dev libxml2 \
                        libxml2-dev software-properties-common python-software-properties dnsutils \
                        git wget curl python3 iftop cron && \
     wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O - | python3
 
-#flaskºÍrequestsµ¥¶À·Å³öÀ´RUN£¬Ôö¼ÓÒ»²ã£¬¼õÉÙ±àÒëµ÷ÊÔÊ±¼ä¡£ÍÆ¼ö°²×°µÄcChardet fastcacheÒ»Ö±³ö´í£¬²»ÖªµÀÎªÊ²Ã´£¬¸É´àÉáÈ¥¡£
+#flaskå’Œrequestså•ç‹¬æ”¾å‡ºæ¥RUNï¼Œå¢åŠ ä¸€å±‚ï¼Œå‡å°‘ç¼–è¯‘è°ƒè¯•æ—¶é—´ã€‚æ¨èå®‰è£…çš„cChardet fastcacheä¸€ç›´å‡ºé”™ï¼Œä¸çŸ¥é“ä¸ºä»€ä¹ˆï¼Œå¹²è„†èˆå»ã€‚
 RUN pip3 install -U flask requests
 
-#Apache2 installation¡£ "LC_ALL=C.UTF-8"±ØĞëÌí¼Ó£¬Òª²»È»apt-key»ñÈ¡Ê§°Ü»áµ¼ÖÂºóĞøºÜ¶à´íÎó¡£
+#Apache2 installationã€‚ "LC_ALL=C.UTF-8"å¿…é¡»æ·»åŠ ï¼Œè¦ä¸ç„¶apt-keyè·å–å¤±è´¥ä¼šå¯¼è‡´åç»­å¾ˆå¤šé”™è¯¯ã€‚
 RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/apache2 && \
     apt-key update && apt-get update && apt-get upgrade -y && \
     apt-get install -y apache2 && \
     a2enmod rewrite mime include headers filter expires deflate autoindex setenvif ssl http2 && \
     apt-get install -y libapache2-mod-wsgi-py3
 
-#Zmirror installation,Èç¹ûÒª°²×°ÁíÍâµÄÀıÈçYouTube¾µÏñ£¬ÇëĞŞ¸Ä´Ë¶Î¡£
+#Zmirror installation,å¦‚æœè¦å®‰è£…å¦å¤–çš„ä¾‹å¦‚YouTubeé•œåƒï¼Œè¯·ä¿®æ”¹æ­¤æ®µã€‚
 #Reference https://github.com/aploium/zmirror/wiki/%E5%9C%A8%E4%B8%80%E5%8F%B0VPS%E9%83%A8%E7%BD%B2%E5%A4%9A%E4%B8%AAzmirror%E9%95%9C%E5%83%8F
 RUN cd /var/www && \
     git clone https://github.com/aploium/zmirror ${MIRROR_NAME} && chown -R www-data.www-data ${MIRROR_NAME} && \
