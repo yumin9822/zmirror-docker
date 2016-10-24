@@ -51,7 +51,7 @@ ADD apache2-http.conf /etc/apache2/sites-enabled/apache2-http.conf.sample
 #ADD no-ip-access.conf /etc/apache2/sites-enabled/no-ip-access.conf
 
 
-ADD ENTRY.sh /ENTRY.sh
+ADD ENTRY.sh /
 RUN chmod a+x /ENTRY.sh
 
 VOLUME ["/etc/letsencrypt"]
