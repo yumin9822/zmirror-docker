@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+#set -e
 
 if [ "${DOMAIN}" == "**None**" ]; then
     echo "Please specify DOMAIN"
