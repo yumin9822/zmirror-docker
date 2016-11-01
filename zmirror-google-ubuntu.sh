@@ -22,7 +22,7 @@ read -p "Press [Enter] key to continue, Press \"Ctrl + C\" to Quit..."
 export LC_ALL=C.UTF-8
 \cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
-#python3-dev build-essential±ØÐë°²×°£¬Òª²»È»cchardet fastcache lru-dictÈýÕß¶¼»á°²×°Ê§°Ü¡£
+#python3-dev build-essentialå¿…é¡»å®‰è£…ï¼Œè¦ä¸ç„¶cchardet fastcache lru-dictä¸‰è€…éƒ½ä¼šå®‰è£…å¤±è´¥ã€‚
 apt-get -y update
 apt-get -y install python3 python3-dev wget git curl openssl cron build-essential
 wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O - | python3
@@ -45,12 +45,12 @@ wget --no-check-certificate -O /etc/apache2/sites-enabled/apache2-https.conf.sam
 cd /var/www
 git clone https://github.com/aploium/zmirror ${MIRROR_NAME} --depth=1
 chown -R www-data.www-data ${MIRROR_NAME}
-#Èç¹ûÄãÒª¾µÏñÆäËûÍøÕ¾£¬ÇëÐÞ¸ÄÏÂÐÐ´úÂë£¬youtubeºÍtwitter»¹Òª¸´ÖÆcustom_func.py
+#å¦‚æžœä½ è¦é•œåƒå…¶ä»–ç½‘ç«™ï¼Œè¯·ä¿®æ”¹ä¸‹è¡Œä»£ç ï¼Œyoutubeå’Œtwitterè¿˜è¦å¤åˆ¶custom_func.py
 cp /var/www/${MIRROR_NAME}/more_configs/config_google_and_zhwikipedia.py /var/www/${MIRROR_NAME}/config.py
 sed -i "s/^my_host_scheme.*$/my_host_scheme = \'https:\/\/\'/g" /var/www/${MIRROR_NAME}/config.py
 echo "verbose_level = 2" >> /var/www/${MIRROR_NAME}/config.py
 
-#certbot°²×°
+#certbotå®‰è£…
 apt-get install -y ca-certificates gcc python libpython-dev libpython2.7 libpython2.7-dev python-pkg-resources python-setuptools python2.7-dev zlib1g-dev
 apt-get install -y augeas-lenses dialog libaugeas0 libffi-dev libssl-dev python-dev python-virtualenv
 git clone https://github.com/certbot/certbot.git --depth=1 /etc/certbot
