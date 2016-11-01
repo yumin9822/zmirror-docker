@@ -14,11 +14,11 @@ ENV MIRROR_NAME google
 RUN apt-get update && \cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     apt-get install -y build-essential patch binutils make devscripts nano libtool libssl-dev libxml2 \
                        libxml2-dev software-properties-common python-software-properties dnsutils \
-                       git wget curl python3 iftop cron && \
+                       git wget curl python3 python3-dev iftop cron && \
     wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O - | python3
 
 #flask和requests单独放出来RUN，增加一层，减少编译调试时间。推荐安装的cChardet fastcache一直出错，不知道为什么，干脆舍去。
-RUN pip3 install -U flask requests
+RUN pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
 
 #Apache2 installation。 "LC_ALL=C.UTF-8"必须添加，要不然apt-key获取失败会导致后续很多错误。
 RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/apache2 && \
@@ -45,9 +45,9 @@ ADD zmirror-apache-boilerplate.conf /etc/apache2/conf-enabled/zmirror-apache-boi
 
 #zmirror-http-redirection.conf is to let *:80 automatically redirects *:443
 #apache2-https.conf and apache2-http.conf are two virtual host templates from zmirror-onekey
-ADD zmirror-http-redirection.conf /etc/apache2/sites-enabled/zmirror-http-redirection.conf
+#ADD zmirror-http-redirection.conf /etc/apache2/sites-enabled/zmirror-http-redirection.conf
 ADD apache2-https.conf /etc/apache2/sites-enabled/apache2-https.conf.sample
-ADD apache2-http.conf /etc/apache2/sites-enabled/apache2-http.conf.sample
+ADD apache2-http.conf /etc/apache2/sites-enabled/zmirror-http-redirection.conf
 #ADD no-ip-access.conf /etc/apache2/sites-enabled/no-ip-access.conf
 
 
