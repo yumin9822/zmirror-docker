@@ -1,4 +1,18 @@
 #!/bin/bash
+#源项目地址https://github.com/aploium/zmirror
+#Maintainer yumin9822@gmail.com
+#本项目https://github.com/yumin9822/zmirror-docker
+#############################################
+#更新日志
+#增加了一些必要判断，减少再次添加域名运行时间
+#
+#
+#
+#
+#
+#############################################
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
+export PATH
 # Check if user is root
 if [ $(id -u) != "0" ]; then
     echo "Error: You must be root to run this script"
@@ -6,6 +20,7 @@ if [ $(id -u) != "0" ]; then
 fi
 
 #以下列表从这里获取的https://github.com/aploium/zmirror/tree/master/more_configs
+#列表9中原作者有一处拼写错误，thumblr，脚本仅在前面手动选择处改为tumblr。后续还是保持和原作者一直。
 cat >&2 <<-'EOF'
 	######################################################
 	which site do you want to mirror? input the number. 
@@ -19,7 +34,7 @@ cat >&2 <<-'EOF'
 	6. google_and_zhwikipedia
 	7. instagram
 	8. thepiratebay
-	9. thumblr
+	9. tumblr
 	10.twitter_mobile
 	11.twitter_pc
 	12.youtube_mobile
@@ -76,25 +91,39 @@ export LC_ALL=C.UTF-8
 \cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 #python3-dev build-essential必须安装，要不然cchardet fastcache lru-dict三者都会安装失败。
-apt-get -y update
-apt-get -y install python3 python3-dev wget git curl openssl cron build-essential
-wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O - | python3
-pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
+type pip3 >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+	echo "pip3 is not installed, start to install python3 and pip3"
+	apt-get -y update
+	apt-get -y install python3 python3-dev wget git curl openssl cron build-essential
+	wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O - | python3
+fi
 
-apt-get -y install software-properties-common python-software-properties
-LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/apache2 && apt-key update
-apt-get -y update
-apt-get -y install apache2
-apt-get -y install libapache2-mod-wsgi-py3
-a2enmod rewrite mime include headers filter expires deflate autoindex setenvif ssl http2
+pip3 list| grep Flask >/dev/null 2>&1 && pip3 list| grep requests >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+	echo "Python dependencies are not installed, start to install"
+	pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
+fi
+
+
+grep -E -v '^#|^ *$' /etc/apt/sources.list /etc/apt/sources.list.d/*| grep "ondrej/apache2" >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+	apt-get -y install software-properties-common python-software-properties
+	LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/apache2 && apt-key update
+	apt-get -y update
+	apt-get -y install apache2
+	apt-get -y install libapache2-mod-wsgi-py3
+	a2enmod rewrite mime include headers filter expires deflate autoindex setenvif ssl http2
+fi
 
 rm -rf /etc/apache2/sites-enabled/000-default.conf
 rm -rf /etc/apache2/conf-enabled/apache2-doc.conf
 rm -rf /etc/apache2/conf-enabled/security.conf
-wget --no-check-certificate -O /etc/apache2/conf-enabled/apache2-boilerplate.conf https://github.com/aploium/zmirror-onekey/raw/master/configs/apache2-boilerplate.conf
-wget --no-check-certificate -O /etc/apache2/sites-enabled/zmirror-http-redirection.conf https://github.com/aploium/zmirror-onekey/raw/master/configs/apache2-http.conf
-wget --no-check-certificate -O /etc/apache2/sites-enabled/apache2-https.conf.sample  https://github.com/aploium/zmirror-onekey/raw/master/configs/apache2-https.conf
-
+if [ ! -f "/etc/apache2/conf-enabled/apache2-boilerplate.conf" ]; then
+	wget --no-check-certificate -O /etc/apache2/conf-enabled/apache2-boilerplate.conf https://github.com/aploium/zmirror-onekey/raw/master/configs/apache2-boilerplate.conf
+	wget --no-check-certificate -O /etc/apache2/sites-enabled/zmirror-http-redirection.conf https://github.com/aploium/zmirror-onekey/raw/master/configs/apache2-http.conf
+	wget --no-check-certificate -O /etc/apache2/sites-enabled/apache2-https.conf.sample  https://github.com/aploium/zmirror-onekey/raw/master/configs/apache2-https.conf
+fi
 
 #开始安装zmirror
 echo "zmirror start installation"
