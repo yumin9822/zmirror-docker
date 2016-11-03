@@ -5,7 +5,7 @@
 #############################################
 #更新日志
 #增加了一些必要判断，减少再次添加域名运行时间
-#
+#x86 and x86_64 on Ubuntu 14.04, 16.04, 16.10 all passed
 #
 #
 #
@@ -152,6 +152,10 @@ if [ ! -d "/etc/certbot" ]; then
 	git clone https://github.com/certbot/certbot.git --depth=1 /etc/certbot
 fi
 service apache2 stop
+grep "Ubuntu 16." /etc/*release
+if [ $? -eq 0 ]; then
+	apt-get install -y python3-virtualenv virtualenv
+fi
 /etc/certbot/certbot-auto certonly -t --agree-tos --standalone -m your@gmail.com -d ${DOMAIN}
 
 #SSL certification weekly renew script
