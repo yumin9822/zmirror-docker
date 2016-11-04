@@ -5,7 +5,7 @@
 #############################################
 #请注意Debian安装certbot的方法和ubuntu版本不一样。
 #Debian 7 8 passed
-#
+#SID repo was added in the /etc/apt/sources.list
 #
 #
 #
@@ -84,18 +84,42 @@ if [ -z $DOMAIN ]; then
 fi
 
 echo "You are ready to mirror \"${MIRROR_NAME}\" with the domain \"${DOMAIN}\""
+echo "############################################################"
+echo "The sid unstable repo will add to your /etc/apt/sources.list"
+echo "Also apt-pinning was set. Package priority Stable > testing > unstable."
+echo "It possibly cause some problems on your OS, Please be noted"
+echo "############################################################"
 read -p "Press [Enter] key to continue, Press \"Ctrl + C\" to Quit..."
 
 export LC_ALL=C.UTF-8
 \cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
 #python3.5-dev build-essential必须安装，要不然cchardet fastcache lru-dict三者都会安装失败。
+#http://foojitsu.com/blog/2014/12/installing-python-3-4-and-ipython-on-debian-wheezy/
+#apt-get 后面必须添加"-t sid"参数强制从sid安装python3.5和apache2.4.23
+#refer to http://www.binarytides.com/enable-testing-repo-debian/
 type pip3 >/dev/null 2>&1
 if [ $? -ne 0 ]; then
 	echo "pip3 is not installed, start to install python3.5 and pip3"
 	echo "deb http://ftp.debian.org/debian sid main" >> /etc/apt/sources.list
-	apt-get -y update
-	apt-get -y install python3.5-dev python3.5 wget git curl openssl cron build-essential
+	echo "set up apt-pinning. Package priority Stable > testing > unstable."
+	cat >> /etc/apt/preferences<<-EOF
+	Package: *
+	Pin: release a=stable
+	Pin-Priority: 700
+
+	Package: *
+	Pin: release a=testing
+	Pin-Priority: 650
+
+	Package: *
+	Pin: release a=unstable
+	Pin-Priority: 600
+	EOF
+	export DEBIAN_FRONTEND=noninteractive
+	apt-get update -y
+	apt-get -t sid -y -q install python3.5-dev python3.5 wget git openssl build-essential
+	apt-get install -y -q curl
 	wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O - | python3.5
 fi
 
@@ -105,11 +129,11 @@ if [ $? -ne 0 ]; then
 	pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
 fi
 
-type apache2 >/dev/null 2>&1
+apache2 -version | grep 2.4 >/dev/null 2>&1
 if [ $? -ne 0 ]; then
-	apt-get -y update
-	apt-get -y install apache2
-	apt-get -y install libapache2-mod-wsgi-py3
+	#apt-get -y update
+	apt-get install -t sid -y -q apache2
+	apt-get install -t sid -y -q libapache2-mod-wsgi-py3
 	a2enmod rewrite mime include headers filter expires deflate autoindex setenvif ssl http2 wsgi
 fi
 
@@ -129,6 +153,12 @@ fi
 #开始安装zmirror
 echo "zmirror start installation"
 cd /var/www
+
+#fix the git curl error, downgrade to stable version
+apt-get remove -y --auto-remove curl libcurl3-gnutls
+apt-get install -y -q curl libcurl3-gnutls
+apt-get install -t sid -y -q git
+
 git clone https://github.com/aploium/zmirror ${MIRROR_NAME} --depth=1
 chown -R www-data.www-data ${MIRROR_NAME}
 
@@ -151,8 +181,8 @@ esac
 if [ ! -f "/usr/local/bin/letsencrypt" ]; then
 	apt-get install -y python-pip python-dev libssl-dev dialog libffi-dev
 	/usr/bin/pip install -U pip
-	/usr/bin/pip install setuptools
-	/usr/bin/pip install letsencrypt
+	/usr/bin/pip install -U setuptools
+	/usr/bin/pip install -U letsencrypt
 fi
 service apache2 stop
 /usr/local/bin/letsencrypt certonly -t --agree-tos --standalone -m your@gmail.com -d ${DOMAIN}
