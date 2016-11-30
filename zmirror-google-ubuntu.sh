@@ -26,7 +26,8 @@ export LC_ALL=C.UTF-8
 apt-get -y update
 apt-get -y install python3 python3-dev wget git curl openssl cron build-essential
 wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O - | python3
-pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
+#pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
+pip3 install -r https://github.com/aploium/zmirror/raw/master/requirements.txt
 
 apt-get -y install software-properties-common python-software-properties
 LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/apache2 && apt-key update
