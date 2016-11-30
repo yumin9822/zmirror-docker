@@ -18,7 +18,8 @@ RUN apt-get update && \cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py -O - | python3
 
 #推荐安装的cChardet fastcache需要安装python3-dev和build-essential
-RUN pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
+#RUN pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
+RUN pip3 install -r https://raw.githubusercontent.com/aploium/zmirror/master/requirements.txt
 
 #Apache2 installation。 "LC_ALL=C.UTF-8"必须添加，要不然apt-key获取失败会导致后续很多错误。
 RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/apache2 && \
