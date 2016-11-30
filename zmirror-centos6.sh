@@ -115,7 +115,8 @@ fi
 pip3 list| grep Flask >/dev/null 2>&1 && pip3 list| grep requests >/dev/null 2>&1
 if [ $? -ne 0 ]; then
 	echo "Python dependencies are not installed, start to install"
-	pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
+	#pip3 install -U flask requests distro chardet cchardet fastcache lru-dict
+	pip3 install -r https://github.com/aploium/zmirror/raw/master/requirements.txt
 fi
 
 #http://unix.stackexchange.com/questions/138899/centos-install-using-yum-apache-2-4
