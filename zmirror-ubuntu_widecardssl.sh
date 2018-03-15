@@ -6,7 +6,7 @@
 #更新日志
 #增加了一些必要判断，减少再次添加域名运行时间
 #x86 and x86_64 on Ubuntu 14.04, 16.04, 16.10 all passed
-#remove the ssl part. 20180315
+#
 #
 #
 #
@@ -84,6 +84,13 @@ if [ -z $DOMAIN ]; then
 	exit 1
 fi
 
+echo "Please make sure you have the wildcard ssl in the following folder"
+echo "And the name of files are:cert.pem privkey.pem chain.pem"
+read -t 60 -p "(Input your wildcard ssl certificate folder, default is: /home/ssl):" SSL_HOME
+if [ -z $SSL_HOME ]; then
+	SSL_HOME="/home/ssl"
+fi
+
 echo "You are ready to mirror \"${MIRROR_NAME}\" with the domain \"${DOMAIN}\""
 read -p "Press [Enter] key to continue, Press \"Ctrl + C\" to Quit..."
 
@@ -152,9 +159,10 @@ sed -i "s/{{mirror_name}}/${MIRROR_NAME}/g" /etc/apache2/sites-enabled/zmirror-$
 sed -i "s/{{domain}}/${DOMAIN}/g" /etc/apache2/sites-enabled/zmirror-${MIRROR_NAME}-https.conf
 sed -i "s/{{path_to_wsgi_py}}/\/var\/www\/${MIRROR_NAME}\/wsgi.py/g" /etc/apache2/sites-enabled/zmirror-${MIRROR_NAME}-https.conf
 sed -i "s/{{this_mirror_folder}}/\/var\/www\/${MIRROR_NAME}/g" /etc/apache2/sites-enabled/zmirror-${MIRROR_NAME}-https.conf
-sed -i "s/{{cert_file}}/\/etc\/letsencrypt\/live\/${DOMAIN}\/cert.pem/g" /etc/apache2/sites-enabled/zmirror-${MIRROR_NAME}-https.conf
-sed -i "s/{{private_key_file}}/\/etc\/letsencrypt\/live\/${DOMAIN}\/privkey.pem/g" /etc/apache2/sites-enabled/zmirror-${MIRROR_NAME}-https.conf
-sed -i "s/{{cert_chain_file}}/\/etc\/letsencrypt\/live\/${DOMAIN}\/chain.pem/g" /etc/apache2/sites-enabled/zmirror-${MIRROR_NAME}-https.conf
+#注意下面的地方“/”被替换成了“:”，要不然会报错
+sed -i "s:{{cert_file}}:${SSL_HOME}/cert.pem:g" /etc/apache2/sites-enabled/zmirror-${MIRROR_NAME}-https.conf
+sed -i "s:{{private_key_file}}:${SSL_HOME}/privkey.pem:g" /etc/apache2/sites-enabled/zmirror-${MIRROR_NAME}-https.conf
+sed -i "s:{{cert_chain_file}}:${SSL_HOME}/chain.pem:g" /etc/apache2/sites-enabled/zmirror-${MIRROR_NAME}-https.conf
 
 if [ "${MIRROR_NAME}" != "${NAME}" ]; then
 	echo "Please manually edit the following file, then start the apache2 by \"service apache2 start\""
